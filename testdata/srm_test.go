@@ -34,7 +34,7 @@ func runTest(m *testing.M) error {
 	}
 	defer db.Close()
 
-	_, err = db.Exec(`CREATE TABLE users(id text, name text, age int, created_at text)`)
+	_, err = db.Exec(`CREATE TABLE users(id text, name text, age int, created_at datetime)`)
 	if err != nil {
 		return fmt.Errorf("failed to create users table: %w", err)
 	}

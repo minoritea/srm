@@ -112,7 +112,7 @@ func (s *Spec) scan(ancestors []string, ts *ast.TypeSpec) {
 			if !isPublic(n.Name) {
 				continue
 			}
-			name := strings.ToLower(n.Name)
+			name := camelToSnake(n.Name)
 			s.Fields[name] = append(
 				s.Fields[name],
 				strings.Join(append(append([]string{s.Name}, ancestors...), n.Name), "."),
@@ -124,6 +124,31 @@ func (s *Spec) scan(ancestors []string, ts *ast.TypeSpec) {
 var upperCaseLetters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ" // No support for unicode upper case letters.
 func isPublic(name string) bool {
 	return strings.ContainsAny(name[0:1], upperCaseLetters)
+}
+
+func camelToSnake(text string) string {
+	var (
+		results = []string{""}
+	)
+
+	for len(text) > 0 {
+		i := strings.IndexAny(text, upperCaseLetters)
+		if i == 0 {
+			results[len(results)-1] += strings.ToLower(text[0:1])
+			text = text[1:]
+			continue
+		}
+
+		if i < 0 {
+			results[len(results)-1] += text
+			break
+		}
+
+		results[len(results)-1] += text[0:i]
+		results = append(results, "")
+		text = text[i:]
+	}
+	return strings.Join(results, "_")
 }
 
 var tmpl = template.Must(template.New("*SRM").Parse(`package testdata

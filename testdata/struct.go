@@ -17,5 +17,5 @@ type User struct {
 
 type Emailer struct {
 	ID    string
-	Email EmailAddress
+	EMail EmailAddress
 }
