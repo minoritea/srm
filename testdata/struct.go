@@ -6,7 +6,7 @@ import (
 
 type EmailAddress string
 
-//go:generate go run ../main.go -type User
+//go:generate go run ../cmd/srm/main.go -type User
 type User struct {
 	ID, Name string
 	Age      int
