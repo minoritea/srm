@@ -1,6 +1,7 @@
 package testdata
 
 import (
+	"github.com/minoritea/srm/testdata/pkg"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type User struct {
 	Emailer
 	CreatedAt    time.Time
 	privateField string
+	pkg2.Writer
 }
 
 type Emailer struct {

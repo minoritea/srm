@@ -27,9 +27,14 @@ func main() {
 		log.Panicf("%v", err)
 	}
 
-	specs, err := srm.ParseFile(file, []string{*name})
+	parser := srm.NewParser()
 
-	err = srm.Template.Execute(output, specs)
+	err = parser.ParseFile(file, []string{*name}).Err()
+	if err != nil {
+		log.Panicf("%v", err)
+	}
+
+	err = srm.Template.Execute(output, parser.Models())
 	if err != nil {
 		log.Panicf("%v", err)
 	}
