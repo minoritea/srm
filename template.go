@@ -16,22 +16,22 @@ func (row *{{ .Name }}SRMRow) bind(rows *sql.Rows, columns []string) error {
 	var (
 		dest []interface{}
 		{{- range $name, $_ := .Fields }}
-		counterOf{{ $name }} int
+		counter_of_{{ $name }} int
 		{{- end }}
 	)
 	for _, name := range columns {
 		switch name {
 		{{- range $name, $fields := .Fields }}
 		case "{{ $name }}":
-			switch counterOf{{ $name }} {
+			switch counter_of_{{ $name }} {
 			{{- range $index, $field := $fields }}
 			case {{ $index }}:
 				dest = append(dest, &row.{{ $field }})
-				counterOf{{ $name }}++
+				counter_of_{{ $name }}++
 				continue
 			{{- end }}
 			}
-			counterOf{{ $name }}++
+			counter_of_{{ $name }}++
 		{{- end }}
 		}
 		var i interface{}

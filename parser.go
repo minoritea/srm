@@ -5,7 +5,9 @@ import (
 	"go/build"
 	"go/parser"
 	"go/token"
+	"reflect"
 	"strconv"
+	"strings"
 
 	"log"
 )
@@ -98,18 +100,14 @@ func (fp *fileParser) parseModel(ts *ast.TypeSpec) Model {
 	name := ts.Name.Name
 	model := Model{Name: name, Fields: map[string][]string{}}
 	for _, fld := range fp.parseStruct(name, ts) {
-		snakeName := fld.snakeName()
-		model.Fields[snakeName] = append(model.Fields[snakeName], fld.completeName())
+		model.Fields[fld.columnName] = append(model.Fields[fld.columnName], fld.completeName)
 	}
 	return model
 }
 
 type field struct {
-	name, ancestors string
+	columnName, completeName string
 }
-
-func (f field) snakeName() string    { return camelToSnake(f.name) }
-func (f field) completeName() string { return f.ancestors + "." + f.name }
 
 func (fp *fileParser) parseEmbededStruct(ancestors string, ident *ast.Ident) []field {
 	if ident.Obj == nil {
@@ -203,14 +201,69 @@ func (fp *fileParser) parseField(ancestors string, f *ast.Field) []field {
 		}
 		return nil
 	}
-	for _, n := range f.Names {
+
+	var tag = fp.parseTag(f.Tag)
+	for i, n := range f.Names {
+		columnName := camelToSnake(n.Name)
+		if i == len(f.Names)-1 {
+			if tag.skip {
+				continue
+			}
+
+			if tag.name != nil {
+				columnName = *tag.name
+			}
+		}
+
 		if !isPublic(n.Name) {
 			continue
 		}
+
 		result = append(result, field{
-			name:      n.Name,
-			ancestors: ancestors,
+			columnName:   columnName,
+			completeName: ancestors + "." + n.Name,
 		})
 	}
 	return result
+}
+
+type tag struct {
+	name *string
+	skip bool
+}
+
+func (fp *fileParser) parseTag(t *ast.BasicLit) tag {
+	if t == nil {
+		return tag{}
+	}
+
+	unquote, err := strconv.Unquote(t.Value)
+	if err != nil {
+		log.Printf("warn: failed to unquote: value=%q, error=%+v", t.Value, err)
+		return tag{}
+	}
+	st := reflect.StructTag(unquote)
+	tagv, ok := st.Lookup("srm")
+	if !ok {
+		return tag{}
+	}
+
+	var (
+		skip bool
+		name *string
+	)
+	for _, v := range strings.Split(tagv, ",") {
+		if v == "-" {
+			skip = true
+			continue
+		}
+
+		kv := strings.Split(v, "=")
+		if len(kv) == 2 && kv[0] == "name" {
+			name = &kv[1]
+			continue
+		}
+	}
+
+	return tag{skip: skip, name: name}
 }
