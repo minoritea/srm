@@ -8,11 +8,8 @@ import (
 	"database/sql"
 )
 {{ range . }}
-type {{ .Name }}SRMRow struct {
-	{{ .Name }}
-}
 
-func (row *{{ .Name }}SRMRow) bind(rows *sql.Rows, columns []string) error {
+func (row *{{ .Name }}) bind(rows *sql.Rows, columns []string) error {
 	var (
 		dest []interface{}
 		{{- range $name, $_ := .Fields }}
@@ -26,7 +23,7 @@ func (row *{{ .Name }}SRMRow) bind(rows *sql.Rows, columns []string) error {
 			switch counter_of_{{ $name }} {
 			{{- range $index, $field := $fields }}
 			case {{ $index }}:
-				dest = append(dest, &row.{{ $field }})
+				dest = append(dest, &row{{ $field }})
 				counter_of_{{ $name }}++
 				continue
 			{{- end }}
@@ -40,8 +37,8 @@ func (row *{{ .Name }}SRMRow) bind(rows *sql.Rows, columns []string) error {
 	return rows.Scan(dest...)
 }
 
-type {{ .Name }}SRM []{{ .Name }}SRMRow
-func (srm *{{ .Name }}SRM) Bind(rows *sql.Rows, err error) error {
+type {{ .Name }}s []{{ .Name }}
+func (srm *{{ .Name }}s) Bind(rows *sql.Rows, err error) error {
 	if err != nil {
 		return err
 	}
@@ -53,7 +50,7 @@ func (srm *{{ .Name }}SRM) Bind(rows *sql.Rows, err error) error {
 	}
 
 	for rows.Next() {
-		var srmRow {{ .Name }}SRMRow
+		var srmRow {{ .Name }}
 		err := srmRow.bind(rows, columns)
 		if err != nil {
 			return err

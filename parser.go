@@ -99,7 +99,7 @@ type Model struct {
 func (fp *fileParser) parseModel(ts *ast.TypeSpec) Model {
 	name := ts.Name.Name
 	model := Model{Name: name, Fields: map[string][]string{}}
-	for _, fld := range fp.parseStruct(name, ts) {
+	for _, fld := range fp.parseStruct("", ts) {
 		model.Fields[fld.columnName] = append(model.Fields[fld.columnName], fld.completeName)
 	}
 	return model

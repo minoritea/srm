@@ -67,7 +67,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestBind(t *testing.T) {
-	var users UserSRM
+	var users Users
 	err := users.Bind(
 		db.Query(`select * from users u join emailers e on u.id = e.id`),
 	)
