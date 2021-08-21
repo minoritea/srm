@@ -13,6 +13,7 @@ import (
 )
 
 type Parser struct {
+	pkgName string
 	*token.FileSet
 	models map[string]Model
 	err    error
@@ -32,10 +33,16 @@ func (p *Parser) setError(err error) *Parser {
 
 func (p *Parser) Err() error { return p.err }
 
-func (p *Parser) Models() []Model {
-	var result []Model
+type Result struct {
+	PkgName string
+	Models  []Model
+}
+
+func (p *Parser) Result() Result {
+	var result Result
+	result.PkgName = p.pkgName
 	for _, model := range p.models {
-		result = append(result, model)
+		result.Models = append(result.Models, model)
 	}
 	return result
 }
@@ -49,6 +56,8 @@ func (p *Parser) ParseFile(file string, types []string) *Parser {
 	if err != nil {
 		return p.setError(err)
 	}
+
+	p.pkgName = f.Name.Name
 
 	fp := &fileParser{Parser: p, File: f}
 

@@ -34,7 +34,7 @@ func main() {
 		log.Panicf("%v", err)
 	}
 
-	err = srm.Template.Execute(output, parser.Models())
+	err = srm.Template.Execute(output, parser.Result())
 	if err != nil {
 		log.Panicf("%v", err)
 	}
