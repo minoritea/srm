@@ -44,6 +44,11 @@ func runTest(m *testing.M) error {
 		return fmt.Errorf("failed to create emailers table: %w", err)
 	}
 
+	_, err = db.Exec(`CREATE TABLE programmers(id text, language text)`)
+	if err != nil {
+		return fmt.Errorf("failed to create emailers table: %w", err)
+	}
+
 	_, err = db.Exec(`INSERT INTO users VALUES('1', 'Alice', 20, '2021-07-21')`)
 	if err != nil {
 		return fmt.Errorf("failed to insert an user: %w", err)
@@ -52,6 +57,11 @@ func runTest(m *testing.M) error {
 	_, err = db.Exec(`INSERT INTO emailers VALUES('1', 'alice@example.com')`)
 	if err != nil {
 		return fmt.Errorf("failed to insert an emailer: %w", err)
+	}
+
+	_, err = db.Exec(`INSERT INTO programmers VALUES('1', 'go')`)
+	if err != nil {
+		return fmt.Errorf("failed to insert a programmer: %w", err)
 	}
 
 	m.Run()
@@ -69,7 +79,7 @@ func TestMain(m *testing.M) {
 func TestBind(t *testing.T) {
 	var users Users
 	err := users.Bind(
-		db.Query(`select * from users u join emailers e on u.id = e.id`),
+		db.Query(`select * from users u join emailers e on u.id = e.id join programmers p on u.id = p.id`),
 	)
 	if err != nil {
 		t.Fatalf("failed to bind users: %v", err)

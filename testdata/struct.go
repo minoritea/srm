@@ -17,6 +17,7 @@ type User struct {
 	pkg2.Writer
 	FamillyName  string `srm:"name=last_name"`
 	IgnoredField string `srm:"-"`
+	Programmer
 }
 
 type Emailer struct {

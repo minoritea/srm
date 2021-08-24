@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"github.com/minoritea/srm"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -20,21 +22,24 @@ func main() {
 		log.Panic(".go file must be given")
 	}
 
-	newFile := strings.TrimSuffix(file, ".go") + "_srm_generated.go"
-
-	output, err := os.OpenFile(newFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
-	if err != nil {
-		log.Panicf("%v", err)
-	}
-
 	parser := srm.NewParser()
 
-	err = parser.ParseFile(file, []string{*name}).Err()
+	err := parser.ParseFile(file, []string{*name}).Err()
 	if err != nil {
 		log.Panicf("%v", err)
 	}
 
-	err = srm.Template.Execute(output, parser.Result())
+	var buf bytes.Buffer
+	err = srm.Template.Execute(&buf, parser.Result())
+	if err != nil {
+		log.Panicf("%v", err)
+	}
+
+	newFile := strings.TrimSuffix(file, ".go") + "_srm_generated.go"
+	if err != nil {
+		log.Panicf("%v", err)
+	}
+	err = ioutil.WriteFile(newFile, buf.Bytes(), 0666)
 	if err != nil {
 		log.Panicf("%v", err)
 	}
